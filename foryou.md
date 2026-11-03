@@ -324,3 +324,39 @@ Verification performed:
 - Checks actually performed:
 - Known limitations / next steps:
 
+
+### 2026-11-03 — Authenticated feed and profile card
+
+The existing protected /feed route now loads the first page of developer profiles. In src/components/Feed.jsx, useEffect starts the Axios GET request to BASE_URL + "user/feed" with page 1, limit 10 and withCredentials enabled. The browser sends the existing login cookie. Cleanup aborts the request if the component unmounts. useState holds the response array and error flag. A null array means loading, an empty array shows the empty-feed message, and a failed request shows an alert.
+
+The endpoint returns an object with a data array, so Axios exposes the profiles at response.data.data. Feed passes users[0] to the new src/components/userCard.jsx as the user prop. Keeping the request in Feed lets UserCard concentrate on rendering one profile. Its figure uses photoUrl and a name-based alt label. The card body shows firstName, lastName, age, gender and about. Ignore and Send Connection are visual buttons only.
+
+The flex and justify-center utilities center the card within the existing layout. w-full and max-w-96 let it shrink on small screens. Semantic daisyUI colors follow the current theme. The layout and routing still come from Body and App.
+
+Backend changes: src/models/user.js adds the supplied profile image URL with HTTP(S) URL validation and the default about text. Age defaults to 21 and gender defaults to male. In src/routes/user.js, the feed projection now includes about and photoUrl. Filtering and pagination continue to use the existing route logic.
+
+The development reset used a verified encrypted backup outside both projects. Seven identities were recreated through signup and login, and three accepted relationships were replayed by their senders and receivers against the new IDs. Temporary test credentials and the identity mapping are encrypted outside Git.
+
+References: [daisyUI Card](https://daisyui.com/components/card/), [daisyUI Button](https://daisyui.com/components/button/), [Tailwind utilities](https://tailwindcss.com/docs/), [React useEffect](https://react.dev/reference/react/useEffect), [React useState](https://react.dev/reference/react/useState).
+
+Checks run: npm run build, npm run lint, authenticated local HTTP requests through Invoke-RestMethod, a temporary Node/Playwright browser check, and curl.exe against the supplied image URL. Verified database identity/reference integrity, safe feed fields, login, a single centered card, mobile width at 375px, theme switching, logout and the guest redirect. The supplied JPEG returned HTTP 200 and decoded in Chrome. Lint reported three existing warnings in Body.jsx and userSlice.js.
+
+### 2026-11-03 — Feed and login styling
+
+The Ignore button uses a deep pink background and white text in both themes. A failed login now shows a compact error alert with an icon directly above Login. See the official daisyUI [Button](https://daisyui.com/components/button/) and [Alert](https://daisyui.com/components/alert/) patterns.
+
+### 2026-11-03 — Edit Profile and live preview
+
+The existing Profile page renders EditProfile so the route stays simple. EditProfile reads the signed-in account with useSelector(store => store.user). Once the account is available, the form initializes its own useState draft. The fields hold strings while you type. The derived profile trims the names, converts the age to a number, and uses the default avatar for an empty photo URL.
+
+Each edit passes a new user prop to UserCard, so the preview updates immediately. The isPreview prop disables both connection buttons and labels them as preview actions. Keeping the draft local prevents unfinished edits from changing the account shown elsewhere. Reloading restores the saved profile.
+
+Save Profile runs frontend validation and shows a compact error alert above the button when a field needs attention. A valid submission displays “Profile Edited successfully” in a success toast for three seconds. Repeated submissions restart the timer, and leaving the page clears it. Saving currently demonstrates feedback only. Persistence and Redux updates belong to a later authenticated PATCH integration.
+
+Official daisyUI patterns used: [Card](https://daisyui.com/components/card/), [Input](https://daisyui.com/components/input/), [Select](https://daisyui.com/components/select/), [Textarea](https://daisyui.com/components/textarea/), [Button](https://daisyui.com/components/button/), [Alert](https://daisyui.com/components/alert/), and [Toast](https://daisyui.com/components/toast/).
+
+### 2026-11-03 — Simplified profile editor
+
+Profile reads the signed-in Redux user, handles loading, and passes the account to EditProfile as a prop. EditProfile keeps the six editable values in local useState and passes that draft straight to UserCard. This gives an immediate preview while the saved Redux account keeps its original values. UserCard owns the existing preview image fallback.
+
+The custom validator was removed because the PATCH API will enforce profile rules. The form keeps its native HTML constraints. For now, submitting clears the error and shows the simulated success toast for three seconds. Later, the Axios error handler can call setError with the backend message. A truthy error currently shows “Error goes here” above Save Profile.

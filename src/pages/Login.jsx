@@ -9,6 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("Rojesh@321");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [credentials, setCredentials] = useState("");
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -27,7 +28,8 @@ export default function Login() {
       console.log(result.data);
       return navigate("/feed");
     } catch (error) {
-      console.log(error.response?.data ?? error.message);
+      setCredentials(error.response?.data.error);
+      console.log(error.response?.data);
     }
   };
 
@@ -71,6 +73,25 @@ export default function Login() {
               required
             />
           </div>
+          {credentials && (
+            <div
+              role="alert"
+              className="alert alert-error alert-horizontal gap-2 px-3 py-2 text-sm"
+            >
+              <svg
+                aria-hidden="true"
+                className="size-5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path strokeLinecap="round" d="m9 9 6 6m0-6-6 6" />
+              </svg>
+              <span>{credentials}</span>
+            </div>
+          )}
           <button className="btn btn-accent w-full" type="submit">
             Login
           </button>

@@ -1,7 +1,9 @@
-import React from "react";
+import { useSelector } from "react-redux";
+import EditProfile from "../components/EditProfile";
 
-const Profile = () => {
-  return <div>Profile</div>;
-};
+export default function Profile() {
+  const user = useSelector((store) => store.user);
+  if (!user) return <p role="status">Loading profile…</p>;
 
-export default Profile;
+  return <EditProfile key={user._id} user={user} />;
+}
