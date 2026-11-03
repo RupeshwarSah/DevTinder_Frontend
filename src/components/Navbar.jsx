@@ -1,6 +1,9 @@
 import { Link, NavLink } from "react-router";
 import ThemeToggle from "./ThemeToggle";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { BASE_URL } from "../utils/constants";
+import { removeUser } from "../utils/userSlice";
 
 const links = [
   ["/", "Home"],
@@ -39,6 +42,18 @@ export default function Navbar() {
   const user = useSelector((store) => store.user);
 
   const firstLetter = user?.firstName?.charAt(0).toUpperCase() || "G";
+
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(BASE_URL + "logout", {}, { withCredentials: true });
+
+      dispatch(removeUser());
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <header className="border-b border-base-300 bg-base-100">
@@ -113,13 +128,11 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <button type="button" disabled>
-                  Settings · Coming soon
-                </button>
+                <button type="button">Settings · Coming soon</button>
               </li>
               <li>
-                <button type="button" disabled>
-                  Logout · Not signed in
+                <button type="button" onClick={handleLogout}>
+                  Logout
                 </button>
               </li>
             </ul>
