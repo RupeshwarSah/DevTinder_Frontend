@@ -1,12 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 export default function Login() {
-  const [emailId, setEmailid] = useState("");
-  const [password, setPassword] = useState("");
+  const [emailId, setEmailid] = useState("rojesh@gmail.com");
+  const [password, setPassword] = useState("Rojesh@321");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // console.log("managing login");
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    try {
+      const result = await axios.post(
+        "http://localhost:3000/login",
+        {
+          emailId: emailId,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+      dispatch(addUser(result.data));
+      console.log(result.data);
+      return navigate("/feed");
+    } catch (error) {
+      console.log(error.response?.data ?? error.message);
+    }
   };
 
   return (
@@ -16,10 +38,7 @@ export default function Login() {
         <form
           className="mt-3 space-y-4"
           aria-describedby="login-preview"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setMessage("This is a preview. You have not been signed in.");
-          }}
+          onSubmit={handleLogin}
         >
           <div className="fieldset">
             <label htmlFor="email" className="fieldset-legend">
@@ -52,11 +71,7 @@ export default function Login() {
               required
             />
           </div>
-          <button
-            className="btn btn-accent w-full"
-            type="submit"
-            onClick={handleLogin}
-          >
+          <button className="btn btn-accent w-full" type="submit">
             Login
           </button>
         </form>
