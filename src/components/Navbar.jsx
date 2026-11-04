@@ -133,6 +133,11 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
+                <Link to="/requests" onClick={closeDropdown}>
+                  Connection Requests
+                </Link>
+              </li>
+              <li>
                 <button type="button" onClick={handleLogout}>
                   Logout
                 </button>
