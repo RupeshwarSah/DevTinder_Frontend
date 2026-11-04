@@ -1,42 +1,30 @@
-export default function UserCard({
-  user,
-  isPreview = false,
-  fallbackPhoto = "https://img.magnific.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-1230.jpg",
-}) {
-  // Get user's full name
-  const name = [user.firstName, user.lastName].filter(Boolean).join(" ");
+import axios from "axios";
+import { BASE_URL } from "../utils/constants";
+import { useDispatch } from "react-redux";
+import { removeFeed } from "../utils/feedSlice";
 
-  // Check whether the photo URL begins with http:// or https://
-  const isValidPhoto =
-    user.photoUrl?.startsWith("https://") ||
-    user.photoUrl?.startsWith("http://");
+export default function UserCard({ user, isPreview = false }) {
+  const name = `${user.firstName} ${user.lastName || ""}`.trim();
+  const dispatch = useDispatch();
 
-  // Use fallback photo for invalid URLs in preview mode
-  const photo = isPreview && !isValidPhoto ? fallbackPhoto : user.photoUrl;
-
-  // If an image fails to load, display the fallback photo
-  const handleImageError = (event) => {
-    const image = event.currentTarget;
-
-    if (isPreview && image.src !== fallbackPhoto) {
-      image.onerror = null;
-      image.src = fallbackPhoto;
-    }
+  const handleRequest = async (status, _id) => {
+    const res = await axios.post(
+      BASE_URL + "request/send/" + status + "/" + _id,
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+    // console.log(res);
+    dispatch(removeFeed(_id));
   };
-
-  // Display age and gender
-  const age =
-    user.age != null && user.age !== "" ? `${user.age} years old` : "";
-
-  const details = [age, user.gender].filter(Boolean).join(" · ");
 
   return (
     <article className="card w-full max-w-96 overflow-hidden bg-base-100 shadow-sm">
       <figure className="aspect-square bg-base-200">
         <img
-          src={photo}
-          onError={isPreview ? handleImageError : undefined}
-          alt={name ? `Profile photo of ${name}` : "Profile photo"}
+          src={user.photoUrl}
+          alt={`Profile photo of ${name}`}
           className="size-full object-cover"
         />
       </figure>
@@ -44,7 +32,9 @@ export default function UserCard({
       <div className="card-body wrap-break-word">
         <h1 className="card-title">{name}</h1>
 
-        <p>{details}</p>
+        <p>
+          {user.age} years old · {user.gender}
+        </p>
 
         <p>{user.about}</p>
 
@@ -52,6 +42,7 @@ export default function UserCard({
           <button
             type="button"
             disabled={isPreview}
+            onClick={() => handleRequest("ignored", user._id)}
             className="btn border-pink-700 bg-pink-700 text-white hover:border-pink-800 hover:bg-pink-800"
           >
             Ignore
@@ -60,9 +51,10 @@ export default function UserCard({
           <button
             type="button"
             disabled={isPreview}
+            onClick={() => handleRequest("interested", user._id)}
             className="btn btn-primary"
           >
-            Send Connection
+            Interested
           </button>
         </div>
 

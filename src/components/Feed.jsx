@@ -13,7 +13,6 @@ const Feed = () => {
   const loadFeed = async () => {
     try {
       const res = await axios.get(BASE_URL + "user/feed", {
-        params: { page: 1, limit: 10 },
         withCredentials: true,
       });
 

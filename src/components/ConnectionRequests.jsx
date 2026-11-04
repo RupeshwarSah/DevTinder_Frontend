@@ -1,23 +1,44 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addRuquests } from "../utils/requestSlice";
+import { addRequests, removeRequests } from "../utils/requestSlice";
 
 const ConnectionRequests = () => {
   const dispatch = useDispatch();
   const requests = useSelector((store) => store.requests);
+  const [error, setError] = useState("");
 
-  const connectionRequests = async () => {
-    const res = await axios.get(BASE_URL + "user/requests/received", {
-      withCredentials: true,
-    });
-    console.log(res.data?.requests);
-    dispatch(addRuquests(res.data?.requests));
+  const fetchRequests = async () => {
+    try {
+      setError("");
+
+      const res = await axios.get(BASE_URL + "user/requests/received", {
+        withCredentials: true,
+      });
+
+      //   console.log(res.data?.requests);
+      dispatch(addRequests(res.data?.requests));
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load connection requests. Please try again.");
+    }
+  };
+
+  const reviewRequest = async (status, _id) => {
+    const res = await axios.post(
+      BASE_URL + "request/review/" + status + "/" + _id,
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+    // console.log(res);
+    dispatch(removeRequests(_id));
   };
 
   useEffect(() => {
-    connectionRequests();
+    fetchRequests();
   }, []);
 
   return (
@@ -44,7 +65,11 @@ const ConnectionRequests = () => {
         </p>
       </header>
 
-      {requests == null ? (
+      {error ? (
+        <div role="alert" className="alert alert-error">
+          <span>{error}</span>
+        </div>
+      ) : requests == null ? (
         <p role="status" className="py-10 text-center text-base-content/70">
           Loading requests…
         </p>
@@ -107,10 +132,18 @@ const ConnectionRequests = () => {
                   )}
                 </div>
                 <div className="card-actions w-full shrink-0 flex-nowrap justify-end gap-2 sm:w-auto">
-                  <button type="button" className="btn btn-success btn-sm w-20">
+                  <button
+                    type="button"
+                    className="btn btn-success btn-sm w-20"
+                    onClick={() => reviewRequest("accepted", request.requestId)}
+                  >
                     Accept
                   </button>
-                  <button type="button" className="btn btn-error btn-sm w-20">
+                  <button
+                    type="button"
+                    className="btn btn-error btn-sm w-20"
+                    onClick={() => reviewRequest("rejected", request.requestId)}
+                  >
                     Reject
                   </button>
                 </div>
