@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useState } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { removeFeed } from "../utils/feedSlice";
@@ -7,16 +8,26 @@ export default function UserCard({ user, isPreview = false }) {
   const name = `${user.firstName} ${user.lastName || ""}`.trim();
   const dispatch = useDispatch();
 
+  const [error, setError] = useState("");
+
   const handleRequest = async (status, _id) => {
-    const res = await axios.post(
-      BASE_URL + "request/send/" + status + "/" + _id,
-      {},
-      {
-        withCredentials: true,
-      },
-    );
-    // console.log(res);
-    dispatch(removeFeed(_id));
+    try {
+      setError("");
+
+      const res = await axios.post(
+        BASE_URL + "request/send/" + status + "/" + _id,
+        {},
+        {
+          withCredentials: true,
+        },
+      );
+
+      // console.log(res);
+      dispatch(removeFeed(_id));
+    } catch (err) {
+      console.error(err);
+      setError("Unable to process your request. Please try again.");
+    }
   };
 
   return (
@@ -57,6 +68,12 @@ export default function UserCard({ user, isPreview = false }) {
             Interested
           </button>
         </div>
+
+        {error && (
+          <div role="alert" className="alert alert-error mt-3 text-sm">
+            <span>{error}</span>
+          </div>
+        )}
 
         {isPreview && (
           <p className="text-xs text-base-content/70">
