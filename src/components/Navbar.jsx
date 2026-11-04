@@ -128,7 +128,9 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <button type="button">Settings · Coming soon</button>
+                <Link to="/connections" onClick={closeDropdown}>
+                  Connections
+                </Link>
               </li>
               <li>
                 <button type="button" onClick={handleLogout}>

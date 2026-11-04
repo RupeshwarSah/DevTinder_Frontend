@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
 import Feed from "./components/Feed";
+import Connection from "./components/Connection";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="signup" element={<Signup />} />
             <Route path="profile" element={<Profile />} />
             <Route path="feed" element={<Feed />} />
+            <Route path="connections" element={<Connection />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
